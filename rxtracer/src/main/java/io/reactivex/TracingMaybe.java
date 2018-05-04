@@ -6,22 +6,22 @@ import com.halfhp.rxtracer.TracingObserver;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 
-public class TracingSingle<T> extends Single<T> {
+public class TracingMaybe<T> extends Maybe<T> {
 
-    private final Single<T> wrapped;
+    private final Maybe<T> wrapped;
 
-    public TracingSingle(@NonNull Single<T> wrapped) {
+    public TracingMaybe(@NonNull Maybe<T> wrapped) {
         this.wrapped = wrapped;
     }
 
     @Override
-    protected void subscribeActual(SingleObserver<? super T> observer) {
-        wrapped.subscribeActual(new SingleObserverWrapper<>(observer));
+    protected void subscribeActual(MaybeObserver<? super T> observer) {
+        wrapped.subscribeActual(new MaybeObserverWrapper<>(observer));
     }
 
-    private static final class SingleObserverWrapper<T> extends TracingObserver<SingleObserver<? super T>> implements SingleObserver<T> {
+    private static final class MaybeObserverWrapper<T> extends TracingObserver<MaybeObserver<? super T>> implements MaybeObserver<T> {
 
-        SingleObserverWrapper(@NonNull SingleObserver<? super T> wrapped) {
+        MaybeObserverWrapper(@NonNull MaybeObserver<? super T> wrapped) {
             super((wrapped));
         }
 
@@ -38,6 +38,11 @@ public class TracingSingle<T> extends Single<T> {
         @Override
         public void onError(Throwable e) {
             wrapped.onError(RxTracer.rewriteStackTrace(e, this.stackTrace));
+        }
+
+        @Override
+        public void onComplete() {
+            wrapped.onComplete();
         }
     }
 }

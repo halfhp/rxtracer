@@ -1,9 +1,9 @@
 package io.reactivex;
 
-import android.support.annotation.NonNull;
-
 import com.halfhp.rxtracer.RxTracer;
+import com.halfhp.rxtracer.TracingObserver;
 
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 
 public class TracingObservable<T> extends Observable<T> {
@@ -16,12 +16,12 @@ public class TracingObservable<T> extends Observable<T> {
 
     @Override
     protected void subscribeActual(io.reactivex.Observer<? super T> observer) {
-        wrapped.subscribeActual(new TracingObserver<>(observer));
+        wrapped.subscribeActual(new ObserverWrapper<>(observer));
     }
 
-    private static final class TracingObserver<T> extends RxTracer.TracingObserverBase<Observer<? super T>> implements io.reactivex.Observer<T> {
+    private static final class ObserverWrapper<T> extends TracingObserver<Observer<? super T>> implements io.reactivex.Observer<T> {
 
-        TracingObserver(@NonNull io.reactivex.Observer<? super T> wrapped) {
+        ObserverWrapper(@NonNull Observer<? super T> wrapped) {
             super((wrapped));
         }
 

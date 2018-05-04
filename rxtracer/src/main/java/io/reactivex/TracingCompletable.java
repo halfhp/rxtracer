@@ -1,9 +1,9 @@
 package io.reactivex;
 
-import android.support.annotation.NonNull;
-
 import com.halfhp.rxtracer.RxTracer;
+import com.halfhp.rxtracer.TracingObserver;
 
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 
 public class TracingCompletable extends Completable {
@@ -16,12 +16,12 @@ public class TracingCompletable extends Completable {
 
     @Override
     protected void subscribeActual(CompletableObserver co) {
-        wrapped.subscribeActual(new Observer(co));
+        wrapped.subscribeActual(new CompletableObserverWrapper(co));
     }
 
-    private static final class Observer extends RxTracer.TracingObserverBase<CompletableObserver> implements CompletableObserver {
+    private static final class CompletableObserverWrapper extends TracingObserver<CompletableObserver> implements CompletableObserver {
 
-        Observer(@NonNull CompletableObserver wrapped) {
+        CompletableObserverWrapper(@NonNull CompletableObserver wrapped) {
             super((wrapped));
         }
 
