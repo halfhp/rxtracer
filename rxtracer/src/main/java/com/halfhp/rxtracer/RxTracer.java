@@ -6,6 +6,8 @@ import io.reactivex.TracingMaybe;
 import io.reactivex.TracingObservable;
 import io.reactivex.TracingSingle;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.annotations.Nullable;
+import io.reactivex.functions.Function;
 import io.reactivex.plugins.RxJavaPlugins;
 
 public class RxTracer {
@@ -36,16 +38,11 @@ public class RxTracer {
     }
 
     public static void enable() {
-        RxJavaPlugins.setOnCompletableAssembly(TracingCompletable::new);
-        RxJavaPlugins.setOnObservableAssembly(TracingObservable::new);
-        RxJavaPlugins.setOnSingleAssembly(TracingSingle::new);
-        RxJavaPlugins.setOnMaybeAssembly(TracingMaybe::new);
-        RxJavaPlugins.setOnFlowableAssembly(TracingFlowable::new);
-
-        // TODO:
-        //RxJavaPlugins.setOnParallelAssembly(TracingParallelFlowable::new);
-        //RxJavaPlugins.setOnConnectableFlowableAssembly(TracingConnectableFlowable::new);
-        //RxJavaPlugins.setOnConnectableObservableAssembly(TracingConnectableObservable::new);
+        RxJavaPlugins.setOnCompletableAssembly(wrapAssembly(TracingCompletable::new, RxJavaPlugins.getOnCompletableAssembly()));
+        RxJavaPlugins.setOnObservableAssembly(wrapAssembly(TracingObservable::new, RxJavaPlugins.getOnObservableAssembly()));
+        RxJavaPlugins.setOnSingleAssembly(wrapAssembly(TracingSingle::new, RxJavaPlugins.getOnSingleAssembly()));
+        RxJavaPlugins.setOnMaybeAssembly(wrapAssembly(TracingMaybe::new, RxJavaPlugins.getOnMaybeAssembly()));
+        RxJavaPlugins.setOnFlowableAssembly(wrapAssembly(TracingFlowable::new, RxJavaPlugins.getOnFlowableAssembly()));
     }
 
     public static void disable() {
@@ -66,5 +63,25 @@ public class RxTracer {
                 break;
         }
         return throwable;
+    }
+
+    /**
+     * Wraps a preexisting assembly if present, so that it it can remain in the assembly pipeline
+     * along with rxtracer.
+     * @param tracer
+     * @param originalAssembly
+     * @param <T>
+     * @return
+     */
+    private static <T> Function<? super T, ? extends T> wrapAssembly(
+            @NonNull Function<? super T, ? extends T> tracer,
+            @Nullable Function<? super T, ? extends T> originalAssembly) {
+        return (Function<T, T>) t -> {
+            if (originalAssembly != null) {
+                return originalAssembly.apply(tracer.apply(t));
+            } else {
+                return tracer.apply(t);
+            }
+        };
     }
 }

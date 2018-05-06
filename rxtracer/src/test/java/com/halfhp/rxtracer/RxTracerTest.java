@@ -4,13 +4,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.reactivex.Completable;
-import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.schedulers.Schedulers;
 
 import static junit.framework.Assert.fail;
 
 public class RxTracerTest {
+
+    private ExampleService exampleService = new ExampleService();
 
     @BeforeClass
     public static void beforeClass() {
@@ -24,11 +24,10 @@ public class RxTracerTest {
     @Test
     public void completable_runtimeException_hasSubscribeInStackTrace() throws Exception {
         final TraceChecker traceChecker = new TraceChecker();
-        Completable.fromAction(() -> {
-            throw new RuntimeException("Bla!");
-        }).subscribeOn(Schedulers.newThread())
+        exampleService.getFooObservable()
+                .flatMapCompletable(foo -> Completable.complete())
                 .subscribe(() -> { // expect this line in the trace
-                }, e -> traceChecker.check(e, 30));
+                }, e -> traceChecker.check(e, 29));
         Thread.sleep(100);
         traceChecker.assertValid();
     }
@@ -36,32 +35,53 @@ public class RxTracerTest {
     @Test
     public void observable_runtimeException_hasSubscribeInStackTrace() throws Exception {
         final TraceChecker traceChecker = new TraceChecker();
-        Observable.fromCallable(() -> {
-            throw new RuntimeException("Bla!");
-        }).subscribeOn(Schedulers.newThread())
+        exampleService.getFooObservable()
                 .subscribe((foo) -> { // expect this line in the trace
-                }, e -> traceChecker.check(e, 42));
+                }, e -> traceChecker.check(e, 39));
         Thread.sleep(100);
         traceChecker.assertValid();
     }
+
+    @Test
+    public void single_runtimeException_hasSubscribeInStackTrace() throws Exception {
+        final TraceChecker traceChecker = new TraceChecker();
+        exampleService.getFooObservable()
+                .singleOrError()
+                .subscribe((foo) -> { // expect this line in the trace
+                }, e -> traceChecker.check(e, 50));
+        Thread.sleep(100);
+        traceChecker.assertValid();
+    }
+
+    @Test
+    public void maybe_runtimeException_hasSubscribeInStackTrace() throws Exception {
+        final TraceChecker traceChecker = new TraceChecker();
+        exampleService.getFooObservable()
+                .singleElement()
+                .subscribe((foo) -> { // expect this line in the trace
+                }, e -> traceChecker.check(e, 61));
+        Thread.sleep(100);
+        traceChecker.assertValid();
+    }
+
 
     private static class TraceChecker {
         private String errorMessage = null;
 
 
-        public void check(@NonNull Throwable e, @NonNull int lineNumber) {
+        void check(@NonNull Throwable e, @NonNull int lineNumber) {
             e.printStackTrace();
             final String className = RxTracerTest.class.getName();
-            for(StackTraceElement element : e.getStackTrace()) {
-                if(element.getClassName().equals(className) && element.getLineNumber() == lineNumber) {
+            for (StackTraceElement element : e.getStackTrace()) {
+                if (element.getClassName().equals(className) && element.getLineNumber() == lineNumber) {
                     return;
                 }
             }
             this.errorMessage = "Trace missing an entry for " + className + ":" + lineNumber;
         }
 
-        public void assertValid() {
-            if(errorMessage != null) {
+        void assertValid() {
+            if (errorMessage != null) {
                 fail(errorMessage);
             }
         }
