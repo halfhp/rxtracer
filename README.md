@@ -14,7 +14,7 @@ repositories {
 implementation 'com.halfhp.rxtracer:rxtracer:0.1.0'
 ```
 
-Also make sure that you have JDK 1.8 compatibility enabled for your project:
+Make sure JDK 1.8 compatibility is enabled as well:
 
 ```groovy
 android {
@@ -32,18 +32,22 @@ RxTracer.enable();
 ```
 
 ## Why You Need It
-It's normal to subscribe to `Observable`, `Flowable`, etc. on a background thread.  When something 
-goes wrong in these cases, the exception's stack trace only leads back to thethreadpool runner 
-that invoked the subscription body.
+Imagine you have an app containing `FooService.java` which includes a method:
 
-Imagine you have dozens or maybe even hundreds of places in your code where you obtain 
-an `Observable` and subscribe to it without providing an error handler because your code is 
-designed to handle exceptions before this point and for unexpected exceptions you want to fail fast.
+```
+public Observable<Stuff> doStuff(...) {
+    return Observable.fromCallable(() -> { ... }
+      .subscribeOn(Schedulers.newThread());
+}
+```
 
-Now imagine that one of your subscriptions contains a bug.  You have multiple records of the 
-offending stack trace, but no way to tell which subscription caused the exception.
+You use this method and others like it throughout your application in hundreds of places.  Unfortunately, like every
+other piece of software on earth your application has bugs.  In this particular made-up case one of the consumers
+of `doStuff` is passing it bad data, causing an exeption.  You've got plenty of stack traces from the issue
+but because these observables run asynchronously there's nothing in them showing which call to `doStuff(...).subscribe(...)` is  the culprit.
+
 You're stuck either adding an error handler with unique logging messages to each subscription
-or setting breakpoints on each subscription and praying you can reproduce the problem locally.
+or setting breakpoints and praying you can reproduce locally.
 
 Or you can install rxtracer.
 
