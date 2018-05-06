@@ -14,7 +14,7 @@ repositories {
 implementation 'com.halfhp.rxtracer:rxtracer:0.1.0'
 ```
 
-Make sure JDK 1.8 compatibility is enabled as well:
+Android users: make sure JDK 1.8 compatibility is enabled as well:
 
 ```groovy
 android {
