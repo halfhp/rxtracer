@@ -15,7 +15,7 @@ buildscript {
 }
 
 ext {
-    theVersionName = '0.1.0'
+    theVersionName = '0.1.1'
 }
 
 allprojects {
