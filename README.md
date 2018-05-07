@@ -14,7 +14,7 @@ repositories {
 implementation 'com.halfhp.rxtracer:rxtracer:0.1.1'
 ```
 
-In your project code, enable RxTracer at the top of `Application.onCreate`:
+In your project code, call the following as early as possible:
 
 ```java
 RxTracer.enable();
