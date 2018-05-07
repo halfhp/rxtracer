@@ -56,12 +56,13 @@ exceptions that rx adds such as an `UndeliverableException` if the exception occ
 has no error handler.
 
 ## Is It Slow?
-The short Answer: 
+
+### The short Answer: 
 
 If the performance overhead of using RxJava in your project didn't scare you away then the overhead of 
 RxTracer shouldn't scare you either.
 
-The Long Answer: 
+### The Long Answer: 
 
 While capturing a stack trace is a relatively slow operation, a trace is captured only once per subscription and 
 subscription tends to be an infrequent operation: You create an observable, you subscribe to it and you operate 
@@ -83,16 +84,16 @@ The first benchmark, `measureInstanteOnly`, measures only the time taken to inst
 All the heavy lifting is done at this stage so these results paint RxTracer in
 the worst possible light.
 
-* RxTracer DISABLED: 4.7ns per instantiation
-* RxTracer ENABLED: 13.851ns per instantiation
+* **DISABLED:** 4.7ns per instantiation
+* **ENABLED:** 13.851ns per instantiation
 
 You'll almost never instantiate an observable without subscribing to it though, since that would be pointless.  As a 
 real-world example the second benchmark  `measureInstantiatePlusSubscibe` measures the combined time of instantiation and subscription:
 
-* RxTracer DISABLED: 49ns per instantiation
-* RxTracer ENABLED: 61ns per instantiation
+* **DISABLED:** 49ns per instantiate-subscribe
+* **ENABLED:** 61ns per instantiate-subscribe
  
-Even in this second benchmark, practically nothing is happening in the body of subscribe and we're still only
-looking at a overhead of about 20%, and a more likely real world slowdown somewhere below 10%.  
+Practically nothing is happening in the body of subscribe and we're still only
+looking at a overhead of about 20%. In most real-world scenarios we're very likely looking at less than 10%.  
 
 
