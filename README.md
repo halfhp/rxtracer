@@ -1,4 +1,4 @@
-# RxTracer [![Codix](https://codix.io/gh/badge/halfhp/rxtracer)](https://codix.io/gh/badge/halfhp/rxtracer) [![CircleCI](https://circleci.com/gh/halfhp/rxtracer.svg?style=shield)](https://circleci.com/gh/halfhp/rxtracer)
+# RxTracer [![Codix](https://codix.io/gh/badge/halfhp/rxtracer)](https://codix.io/gh/repo/halfhp/rxtracer) [![CircleCI](https://circleci.com/gh/halfhp/rxtracer.svg?style=shield)](https://circleci.com/gh/halfhp/rxtracer)
 A Utility to rewrite RxJava2 stack traces to include the original subscribe call-site.
 
 ## Usage
