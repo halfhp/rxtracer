@@ -1,5 +1,10 @@
 package com.halfhp.rxtracer;
 
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.TracingCompletable;
 import io.reactivex.TracingFlowable;
 import io.reactivex.TracingMaybe;
@@ -38,15 +43,47 @@ public class RxTracer {
     }
 
     public static void enable() {
-        RxJavaPlugins.setOnCompletableAssembly(wrapAssembly(TracingCompletable::new, RxJavaPlugins.getOnCompletableAssembly()));
-        RxJavaPlugins.setOnObservableAssembly(wrapAssembly(TracingObservable::new, RxJavaPlugins.getOnObservableAssembly()));
-        RxJavaPlugins.setOnSingleAssembly(wrapAssembly(TracingSingle::new, RxJavaPlugins.getOnSingleAssembly()));
-        RxJavaPlugins.setOnMaybeAssembly(wrapAssembly(TracingMaybe::new, RxJavaPlugins.getOnMaybeAssembly()));
-        RxJavaPlugins.setOnFlowableAssembly(wrapAssembly(TracingFlowable::new, RxJavaPlugins.getOnFlowableAssembly()));
+        RxJavaPlugins.setOnCompletableAssembly(wrapAssembly(new Function<Completable, Completable>() {
+            @Override
+            public Completable apply(Completable wrapped) {
+                return new TracingCompletable(wrapped);
+            }
+        }, RxJavaPlugins.getOnCompletableAssembly()));
+
+
+        RxJavaPlugins.setOnObservableAssembly(wrapAssembly(new Function<Observable, Observable>() {
+            @Override
+            public Observable apply(Observable wrapped) {
+                return new TracingObservable<Object>(wrapped);
+            }
+        }, RxJavaPlugins.getOnObservableAssembly()));
+
+
+        RxJavaPlugins.setOnSingleAssembly(wrapAssembly(new Function<Single, Single>() {
+            @Override
+            public Single apply(Single wrapped) {
+                return new TracingSingle<Object>(wrapped);
+            }
+        }, RxJavaPlugins.getOnSingleAssembly()));
+
+
+        RxJavaPlugins.setOnMaybeAssembly(wrapAssembly(new Function<Maybe, Maybe>() {
+            @Override
+            public Maybe apply(Maybe wrapped) {
+                return new TracingMaybe<Object>(wrapped);
+            }
+        }, RxJavaPlugins.getOnMaybeAssembly()));
+
+        RxJavaPlugins.setOnFlowableAssembly(wrapAssembly(new Function<Flowable, Flowable>() {
+            @Override
+            public Flowable apply(Flowable wrapped) {
+                return new TracingFlowable<Object>(wrapped);
+            }
+        }, RxJavaPlugins.getOnFlowableAssembly()));
     }
 
     public static void disable() {
-        // TODO
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     public static <T extends Throwable> T rewriteStackTrace(@NonNull T throwable, StackTraceElement[] elements) {
@@ -74,13 +111,16 @@ public class RxTracer {
      * @return
      */
     private static <T> Function<? super T, ? extends T> wrapAssembly(
-            @NonNull Function<? super T, ? extends T> tracer,
-            @Nullable Function<? super T, ? extends T> originalAssembly) {
-        return (Function<T, T>) t -> {
-            if (originalAssembly != null) {
-                return originalAssembly.apply(tracer.apply(t));
-            } else {
-                return tracer.apply(t);
+            @NonNull final Function<? super T, ? extends T> tracer,
+            @Nullable final Function<? super T, ? extends T> originalAssembly) {
+        return new Function<T, T>() {
+            @Override
+            public T apply(T t) throws Exception {
+                if (originalAssembly != null) {
+                    return originalAssembly.apply(tracer.apply(t));
+                } else {
+                    return tracer.apply(t);
+                }
             }
         };
     }

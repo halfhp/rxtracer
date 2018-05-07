@@ -4,7 +4,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.reactivex.Completable;
+import io.reactivex.CompletableSource;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 
 import static junit.framework.Assert.fail;
 
@@ -17,17 +21,26 @@ public class RxTracerTest {
         RxTracer.enable();
     }
 
-    /**
-     * Not a practical test to run automatically, however for testing purposes, if the stack trace
-     * contains the exact line number of the subscribe call, it means things are working.
-     */
     @Test
     public void completable_runtimeException_hasSubscribeInStackTrace() throws Exception {
         final TraceChecker traceChecker = new TraceChecker();
         exampleService.getFooObservable()
-                .flatMapCompletable(foo -> Completable.complete())
-                .subscribe(() -> { // expect this line in the trace
-                }, e -> traceChecker.check(e, 29));
+                .flatMapCompletable(new Function<ExampleService.Foo, CompletableSource>() {
+                    @Override
+                    public CompletableSource apply(ExampleService.Foo foo) {
+                        return Completable.complete();
+                    }
+                })
+                .subscribe(new Action() {
+                    @Override
+                    public void run() throws Exception { // expect this line in the trace
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable e) throws Exception {
+                        traceChecker.check(e, 38);
+                    }
+                });
         Thread.sleep(100);
         traceChecker.assertValid();
     }
@@ -36,8 +49,16 @@ public class RxTracerTest {
     public void observable_runtimeException_hasSubscribeInStackTrace() throws Exception {
         final TraceChecker traceChecker = new TraceChecker();
         exampleService.getFooObservable()
-                .subscribe((foo) -> { // expect this line in the trace
-                }, e -> traceChecker.check(e, 39));
+                .subscribe(new Consumer<ExampleService.Foo>() {
+                    @Override
+                    public void accept(ExampleService.Foo foo) { // expect this line in the trace
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable e) {
+                        traceChecker.check(e, 56);
+                    }
+                });
         Thread.sleep(100);
         traceChecker.assertValid();
     }
@@ -47,8 +68,16 @@ public class RxTracerTest {
         final TraceChecker traceChecker = new TraceChecker();
         exampleService.getFooObservable()
                 .singleOrError()
-                .subscribe((foo) -> { // expect this line in the trace
-                }, e -> traceChecker.check(e, 50));
+                .subscribe(new Consumer<ExampleService.Foo>() {
+                    @Override
+                    public void accept(ExampleService.Foo foo) { // expect this line in the trace
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable e) {
+                        traceChecker.check(e, 75);
+                    }
+                });
         Thread.sleep(100);
         traceChecker.assertValid();
     }
@@ -58,8 +87,16 @@ public class RxTracerTest {
         final TraceChecker traceChecker = new TraceChecker();
         exampleService.getFooObservable()
                 .singleElement()
-                .subscribe((foo) -> { // expect this line in the trace
-                }, e -> traceChecker.check(e, 61));
+                .subscribe(new Consumer<ExampleService.Foo>() {
+                    @Override
+                    public void accept(ExampleService.Foo foo) { // expect this line in the trace
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable e) {
+                        traceChecker.check(e, 94);
+                    }
+                });
         Thread.sleep(100);
         traceChecker.assertValid();
     }

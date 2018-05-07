@@ -6,8 +6,8 @@ plugins {
 group = 'com.halfhp.rxtracer'
 version = theVersionName
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 bintray {
     user = System.getenv('BINTRAY_USER')
