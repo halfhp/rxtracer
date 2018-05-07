@@ -33,12 +33,12 @@ public class RxTracerTest {
                 })
                 .subscribe(new Action() {
                     @Override
-                    public void run() throws Exception { // expect this line in the trace
+                    public void run() { // expect this line in the trace
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable e) throws Exception {
-                        traceChecker.check(e, 38);
+                    public void accept(Throwable e) {
+                        traceChecker.check(e, 34);
                     }
                 });
         Thread.sleep(100);
@@ -56,7 +56,7 @@ public class RxTracerTest {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable e) {
-                        traceChecker.check(e, 56);
+                        traceChecker.check(e, 52);
                     }
                 });
         Thread.sleep(100);
@@ -75,7 +75,7 @@ public class RxTracerTest {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable e) {
-                        traceChecker.check(e, 75);
+                        traceChecker.check(e, 71);
                     }
                 });
         Thread.sleep(100);
@@ -94,7 +94,7 @@ public class RxTracerTest {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable e) {
-                        traceChecker.check(e, 94);
+                        traceChecker.check(e, 90);
                     }
                 });
         Thread.sleep(100);
