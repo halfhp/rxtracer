@@ -1,4 +1,4 @@
-# RxTracer
+# RxTracer [![Codix](https://codix.io/gh/badge/halfhp/rxtracer)](https://codix.io/gh/badge/halfhp/rxtracer) [![CircleCI](https://circleci.com/gh/halfhp/rxtracer.svg?style=shield)](https://circleci.com/gh/halfhp/rxtracer)
 A Utility to rewrite RxJava2 stack traces to include the original subscribe call-site.
 
 ## Usage
@@ -56,14 +56,43 @@ exceptions that rx adds such as an `UndeliverableException` if the exception occ
 has no error handler.
 
 ## Is It Slow?
+The short Answer: 
+
+If the performance overhead of using RxJava in your project didn't scare you away then the overhead of 
+RxTracer shouldn't scare you either.
+
+The Long Answer: 
+
 While capturing a stack trace is a relatively slow operation, a trace is captured only once per subscription and 
 subscription tends to be an infrequent operation: You create an observable, you subscribe to it and you operate 
 on it's stream of emissions.  There are many emissions, but only one subscription.
 
-Certainly use cases exist where hundreds or more subscriptions are firing every second.  If
+Use cases do exist where hundreds or more subscriptions are firing every second.  If
 your project falls into that category then you'll want measure the performance impact of using rxtracer.  
 For most software projects, particularly mobile apps, desktop apps and and apps not running on a server, 
 the overhead is typically negligible.
 
+These sorts of assertions are notoriously difficult to prove one way or another, but  I'll attempt to
+use a Caliper microbenchmark to provide some baseline numbers:
+
+For those interested, the source of the microbenchmark is [available here](rxtracer/src/test/java/com/halfhp/rxtracer/RxTracerBenchmark.java).
+
+I ran the following benchmarks on a 2016 Macbook Pro with a 2.9ghz Intel i7 CPU.
+
+The first benchmark, `measureInstanteOnly`, measures only the time taken to instantiate a new Observable.  
+All the heavy lifting is done at this stage so these results paint RxTracer in
+the worst possible light.
+
+* RxTracer DISABLED: 4.7ns per instantiation
+* RxTracer ENABLED: 13.851ns per instantiation
+
+You'll almost never instantiate an observable without subscribing to it though, since that would be pointless.  As a 
+real-world example the second benchmark  `measureInstantiatePlusSubscibe` measures the combined time of instantiation and subscription:
+
+* RxTracer DISABLED: 49ns per instantiation
+* RxTracer ENABLED: 61ns per instantiation
+ 
+Even in this second benchmark, practically nothing is happening in the body of subscribe and we're still only
+looking at a overhead of about 20%, and a more likely real world slowdown somewhere below 10%.  
 
 
