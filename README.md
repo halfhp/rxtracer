@@ -11,18 +11,7 @@ repositories {
     }
 }
 ...
-implementation 'com.halfhp.rxtracer:rxtracer:0.1.0'
-```
-
-Android users: make sure JDK 1.8 compatibility is enabled as well:
-
-```groovy
-android {
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
+implementation 'com.halfhp.rxtracer:rxtracer:0.1.1'
 ```
 
 In your project code, enable RxTracer at the top of `Application.onCreate`:
