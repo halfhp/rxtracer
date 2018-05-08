@@ -66,7 +66,11 @@ RxTracer shouldn't scare you either.
 
 While capturing a stack trace is a relatively slow operation, a trace is captured only once per subscription and 
 subscription tends to be an infrequent operation: You create an observable, you subscribe to it and you operate 
-on it's stream of emissions.  There are many emissions, but only one subscription.
+on it's stream of emissions.  There are many emissions, but only one subscription*.
+
+_\* It has been pointed out that operations such as `flatMap` result in additional subscriptions. This is true but
+point about the ratio between subscriptions and emissions still holds. I've added a benchmark below to 
+capture this scenario._ 
 
 Use cases do exist where hundreds or more subscriptions are firing every second.  If
 your project falls into that category then you'll want measure the performance impact of using rxtracer.  
@@ -80,8 +84,8 @@ For those interested, the source of the microbenchmark is [available here](rxtra
 
 I ran the following benchmarks on a 2016 Macbook Pro with a 2.9ghz Intel i7 CPU.
 
-The first benchmark, `measureInstanteOnly`, measures only the time taken to instantiate a new Observable.  
-All the heavy lifting is done at this stage so these results paint RxTracer in
+The first benchmark, `measureInstantiateOnly`, measures only the time taken to instantiate a new Observable.  
+Most of the heavy lifting is done at this stage so these results paint RxTracer in
 the worst possible light.
 
 * **DISABLED:** 4.7ns per instantiation
@@ -94,6 +98,14 @@ real-world example the second benchmark  `measureInstantiatePlusSubscibe` measur
 * **ENABLED:** 61ns per instantiate-subscribe
  
 Practically nothing is happening in the body of subscribe and we're still only
-looking at a overhead of about 20%. In most real-world scenarios we're very likely looking at less than 10%.  
+looking at a overhead of about 20%. In most real-world scenarios we're very likely looking at less than 10%.
 
+The final benchmark `measureLongFlatMapSubscribeChain` instantiates an observable, runs it through five successive
+invocations of `flatMap` and then subscribes to the result.
+
+* **DISABLED** 128ns per instantiate-flatmap-5x-susbscribe
+* **ENABLED** 142ns per instantiate-flatmap-5x-susbscribe
+
+Which comes out to an overhead of just shy of 10%.  While five successive `flatMap` invocations might be a tad high
+to be representative of an average case, keep in mind that each invocation is doing the bare minimum of work. 
 

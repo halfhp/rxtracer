@@ -3,6 +3,8 @@ package com.halfhp.rxtracer;
 import com.google.caliper.Benchmark;
 import com.google.caliper.api.VmOptions;
 import com.google.caliper.runner.CaliperMain;
+import io.reactivex.ObservableSource;
+import io.reactivex.functions.Function;
 import org.junit.Ignore;
 
 @Ignore
@@ -26,6 +28,48 @@ public class RxTracerBenchmark {
     void measureInstantiatePlusSubscribe(int reps) {
         for(int i = 0; i < reps; i++) {
             exampleService.getBarObservable().subscribe();
+        }
+    }
+
+    @Benchmark
+    void measureLongFlatMapSubscribeChain(int reps) {
+        for(int i = 0; i < reps; i++) {
+            exampleService.getBarObservable()
+                    .flatMap(new Function<ExampleService.Foo, ObservableSource<ExampleService.Foo>>() {
+
+                        @Override
+                        public ObservableSource<ExampleService.Foo> apply(ExampleService.Foo foo) {
+                            return exampleService.getBarObservable();
+                        }
+                    })
+                    .flatMap(new Function<ExampleService.Foo, ObservableSource<ExampleService.Foo>>() {
+
+                        @Override
+                        public ObservableSource<ExampleService.Foo> apply(ExampleService.Foo foo) {
+                            return exampleService.getBarObservable();
+                        }
+                    })
+                    .flatMap(new Function<ExampleService.Foo, ObservableSource<ExampleService.Foo>>() {
+
+                        @Override
+                        public ObservableSource<ExampleService.Foo> apply(ExampleService.Foo foo) {
+                            return exampleService.getBarObservable();
+                        }
+                    })
+                    .flatMap(new Function<ExampleService.Foo, ObservableSource<ExampleService.Foo>>() {
+
+                        @Override
+                        public ObservableSource<ExampleService.Foo> apply(ExampleService.Foo foo) {
+                            return exampleService.getBarObservable();
+                        }
+                    })
+                    .flatMap(new Function<ExampleService.Foo, ObservableSource<ExampleService.Foo>>() {
+
+                        @Override
+                        public ObservableSource<ExampleService.Foo> apply(ExampleService.Foo foo) {
+                            return exampleService.getBarObservable();
+                        }
+                    });
         }
     }
 
