@@ -14,6 +14,7 @@ public class RxTracerBenchmark {
     private final ExampleService exampleService = new ExampleService();
 
     {
+        //Traceur.enableLogging(); // use this to benchmark against Traceur
         RxTracer.enable(); // comment this out to get DISABLED stats
     }
 
@@ -69,10 +70,9 @@ public class RxTracerBenchmark {
                         public ObservableSource<ExampleService.Foo> apply(ExampleService.Foo foo) {
                             return exampleService.getBarObservable();
                         }
-                    });
+                    }).subscribe();
         }
     }
-
 
     public static void main(String[] args) {
         CaliperMain.main(RxTracerBenchmark.class, args);

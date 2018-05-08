@@ -32,5 +32,6 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:2.1.13"
 
     testImplementation 'junit:junit:4.12'
+    testImplementation 'com.tspoon.traceur:traceur:1.0.1'
     testImplementation 'com.google.caliper:caliper:1.0-beta-2'
 }
