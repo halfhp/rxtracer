@@ -88,25 +88,25 @@ The first benchmark, `measureInstantiateOnly`, measures only the time taken to i
 Most of the heavy lifting is done at this stage so these results paint RxTracer in
 the worst possible light.
 
-* **DISABLED:** 4.7ns per instantiation
-* **ENABLED:** 13.851ns per instantiation
+* **DISABLED:** 7.8ns per instantiation
+* **ENABLED:** 14.2ns per instantiation
 
 You'll almost never instantiate an observable without subscribing to it though, since that would be pointless.  As a 
 real-world example the second benchmark  `measureInstantiatePlusSubscibe` measures the combined time of instantiation and subscription:
 
-* **DISABLED:** 49ns per instantiate-subscribe
-* **ENABLED:** 61ns per instantiate-subscribe
+* **DISABLED:** 53ns per instantiate-subscribe
+* **ENABLED:** 62ns per instantiate-subscribe
  
 Practically nothing is happening in the body of subscribe and we're still only
-looking at a overhead of about 20%. In most real-world scenarios we're very likely looking at less than 10%.
+looking at a overhead of about 17%. In most real-world scenarios we're very likely looking at less than 10%.
 
 The final benchmark `measureLongFlatMapSubscribeChain` instantiates an observable, runs it through five successive
 invocations of `flatMap` and then subscribes to the result.
 
-* **DISABLED** 282.3μs per instantiate-flatmap-5x-susbscribe
-* **ENABLED** 311.6μs per instantiate-flatmap-5x-susbscribe
+* **DISABLED** 295.38μs per instantiate-flatmap-5x-susbscribe
+* **ENABLED** 313.75μs per instantiate-flatmap-5x-susbscribe
 
 While both benchmarks shoot up into the microseconds range (possibly due to me misusing Caliper), the measured overhead 
-of RxTracer is roughly 10%.  Five successive `flatMap` invocations might be a tad high to be representative of an average case, 
+of RxTracer is roughly 6%.  Five successive `flatMap` invocations might be a tad high to be representative of an average case, 
 but keep in mind that each invocation is doing the bare minimum of work. 
 

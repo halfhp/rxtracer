@@ -19,14 +19,15 @@ public class ExampleService {
         }).subscribeOn(Schedulers.newThread());
     }
 
-    public Observable<Foo> getBarObservable() {
-        return Observable.fromCallable(new Callable<Foo>() {
+    public Observable<Bar> getBarObservable() {
+        return Observable.fromCallable(new Callable<Bar>() {
             @Override
-            public Foo call() {
-                return new Foo();
+            public Bar call() {
+                return new Bar();
             }
         }).subscribeOn(Schedulers.newThread());
     }
 
     static class Foo {}
+    static class Bar {}
 }
