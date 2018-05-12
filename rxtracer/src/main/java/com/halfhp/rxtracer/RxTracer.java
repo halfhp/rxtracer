@@ -17,7 +17,7 @@ import io.reactivex.plugins.RxJavaPlugins;
 
 public class RxTracer {
 
-    private static Mode mode = Mode.APPEND;
+    private static Mode mode = Mode.REWRITE;
 
     /**
      *
@@ -31,11 +31,17 @@ public class RxTracer {
         REWRITE,
 
         /**
-         * Experimental - appends the the stack trace recorded when subscribe was invoked to the stack trace of the
+         * Append the the stack trace recorded when subscribe was invoked to the stack trace of the
+         * exception generated when the subscribe callback ran
+         */
+        APPEND,
+
+        /**
+         * Experimental - prepend the the stack trace recorded when subscribe was invoked to the stack trace of the
          * exception generated when the subscribe callback ran.  This approach can sometimes produce
          * better stack trace aggregation in bug trackers like Crashalytics etc.
          */
-        APPEND
+        PREPEND
     }
 
     public static void setMode(@NonNull Mode mode) {
@@ -89,17 +95,23 @@ public class RxTracer {
     public static <T extends Throwable> T rewriteStackTrace(@NonNull T throwable, StackTraceElement[] elements) {
         switch(mode) {
             case APPEND:
-                throwable.setStackTrace(elements);
+                throwable.setStackTrace(concat(throwable.getStackTrace(), elements));
+                break;
+            case PREPEND:
+                throwable.setStackTrace(concat(elements, throwable.getStackTrace()));
                 break;
             case REWRITE:
-                final StackTraceElement[] originalTrace = throwable.getStackTrace();
-                final StackTraceElement[] concatenatedTrace = new StackTraceElement[originalTrace.length + elements.length];
-                System.arraycopy(concatenatedTrace, 0, concatenatedTrace, 0, concatenatedTrace.length);
-                System.arraycopy(elements, 0, concatenatedTrace, originalTrace.length, elements.length);
-                throwable.setStackTrace(concatenatedTrace);
+                throwable.setStackTrace(elements);
                 break;
         }
         return throwable;
+    }
+
+    private static StackTraceElement[] concat(StackTraceElement[] first, StackTraceElement[] second) {
+        final StackTraceElement[] concatenatedTrace = new StackTraceElement[first.length + second.length];
+        System.arraycopy(first, 0, concatenatedTrace, 0, first.length);
+        System.arraycopy(second, 0, concatenatedTrace, first.length, second.length);
+        return concatenatedTrace;
     }
 
     /**

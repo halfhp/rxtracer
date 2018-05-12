@@ -1,5 +1,6 @@
 package com.halfhp.rxtracer;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -11,6 +12,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
 
 public class RxTracerTest {
 
@@ -19,6 +21,11 @@ public class RxTracerTest {
     @BeforeClass
     public static void beforeClass() {
         RxTracer.enable();
+    }
+
+    @Before
+    public void before() {
+        RxTracer.setMode(RxTracer.Mode.REWRITE);
     }
 
     @Test
@@ -38,7 +45,7 @@ public class RxTracerTest {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable e) {
-                        traceChecker.check(e, 34);
+                        traceChecker.check(e, 41);
                     }
                 });
         Thread.sleep(100);
@@ -56,7 +63,7 @@ public class RxTracerTest {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable e) {
-                        traceChecker.check(e, 52);
+                        traceChecker.check(e, 59);
                     }
                 });
         Thread.sleep(100);
@@ -75,7 +82,7 @@ public class RxTracerTest {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable e) {
-                        traceChecker.check(e, 71);
+                        traceChecker.check(e, 78);
                     }
                 });
         Thread.sleep(100);
@@ -94,11 +101,37 @@ public class RxTracerTest {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable e) {
-                        traceChecker.check(e, 90);
+                        traceChecker.check(e, 97);
                     }
                 });
         Thread.sleep(100);
         traceChecker.assertValid();
+    }
+
+    @Test
+    public void rewriteStacktrace_append_addsNewTraceToEnd() {
+        RxTracer.setMode(RxTracer.Mode.APPEND);
+        final StackTraceElement[] newTrace = new Exception().getStackTrace();
+        final Exception ex1 = new Exception();
+        final StackTraceElement[] rawTrace = ex1.getStackTrace();
+
+        assertEquals(rawTrace.length + newTrace.length, RxTracer.rewriteStackTrace(ex1, newTrace).getStackTrace().length);
+
+        // first element in the original trace should remain first:
+        assertEquals(rawTrace[0], ex1.getStackTrace()[0]);
+    }
+
+    @Test
+    public void rewriteStacktrace_prepend_addsTraeToStart() {
+        RxTracer.setMode(RxTracer.Mode.PREPEND);
+        final StackTraceElement[] newTrace = new Exception().getStackTrace();
+        final Exception ex1 = new Exception();
+        final StackTraceElement[] rawTrace = ex1.getStackTrace();
+
+        assertEquals(rawTrace.length + newTrace.length, RxTracer.rewriteStackTrace(ex1, newTrace).getStackTrace().length);
+
+        // first element in the new trace should now be first:
+        assertEquals(newTrace[0], ex1.getStackTrace()[0]);
     }
 
 
