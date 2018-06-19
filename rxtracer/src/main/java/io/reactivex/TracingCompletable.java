@@ -1,43 +1,23 @@
 package io.reactivex;
 
-import com.halfhp.rxtracer.RxTracer;
-import com.halfhp.rxtracer.TracingObserver;
+import com.halfhp.rxtracer.CompletableObserverWrapper;
 
+import com.halfhp.rxtracer.StackTraceRewriter;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
 
 public class TracingCompletable extends Completable {
 
     private final Completable wrapped;
+    private final StackTraceRewriter rewriter;
 
-    public TracingCompletable(@NonNull Completable wrapped) {
+    public TracingCompletable(@NonNull Completable wrapped, @NonNull StackTraceRewriter rewriter) {
         this.wrapped = wrapped;
+        this.rewriter = rewriter;
     }
 
     @Override
     protected void subscribeActual(CompletableObserver co) {
-        wrapped.subscribeActual(new CompletableObserverWrapper(co));
+        wrapped.subscribeActual(new CompletableObserverWrapper(co, rewriter));
     }
 
-    private static final class CompletableObserverWrapper extends TracingObserver<CompletableObserver> implements CompletableObserver {
-
-        CompletableObserverWrapper(@NonNull CompletableObserver wrapped) {
-            super((wrapped));
-        }
-
-        @Override
-        public void onSubscribe(Disposable d) {
-            wrapped.onSubscribe(d);
-        }
-
-        @Override
-        public void onComplete() {
-            wrapped.onComplete();
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            wrapped.onError(RxTracer.rewriteStackTrace(t, this.stackTrace));
-        }
-    }
 }
