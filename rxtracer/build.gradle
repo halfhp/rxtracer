@@ -42,6 +42,7 @@ bintray {
     pkg {
         repo = 'rxtracer'
         name = 'com.halfhp.rxtracer:rxtracer'
+        description = "A Utility to rewrite RxJava2 stack traces to include the original subscribe call-site."
         licenses = ['Apache-2.0']
         vcsUrl = gitUrl
         issueTrackerUrl = issuesUrl
