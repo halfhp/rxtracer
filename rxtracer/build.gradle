@@ -14,7 +14,7 @@ targetCompatibility = 1.7
 
 publishing {
     publications {
-        MyPublication(MavenPublication) {
+        Production(MavenPublication) {
             groupId group
             artifactId 'rxtracer'
             version theVersionName
