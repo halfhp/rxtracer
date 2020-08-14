@@ -11,7 +11,7 @@ repositories {
     }
 }
 ...
-implementation 'com.halfhp.rxtracer:rxtracer:0.1.3'
+implementation 'com.halfhp.rxtracer:rxtracer:0.1.4'
 ```
 
 In your project code, call the following as early as possible:
