@@ -15,6 +15,7 @@ targetCompatibility = 1.7
 bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_PASSWORD')
+    publications = ['Production']
     configurations = ['archives']
     pkg {
         repo = 'rxtracer'
