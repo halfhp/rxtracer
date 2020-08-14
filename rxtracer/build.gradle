@@ -12,26 +12,6 @@ def issuesUrl = 'https://github.com/halfhp/rxtracer/issues'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_PASSWORD')
-    publications = ['Production']
-    configurations = ['archives']
-    pkg {
-        repo = 'rxtracer'
-        name = 'com.halfhp.rxtracer:rxtracer'
-        licenses = ['Apache-2.0']
-        vcsUrl = gitUrl
-        issueTrackerUrl = issuesUrl
-        version {
-            name = theVersionName
-            gpg {
-                sign = true
-            }
-        }
-    }
-}
-
 publishing {
     publications {
         MyPublication(MavenPublication) {
@@ -48,6 +28,28 @@ publishing {
                         dependencyNode.appendNode('version', it.version)
                     }
                 }
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_PASSWORD')
+    publications = ['Production']
+    configurations = ['archives']
+    override = true
+    pkg {
+        repo = 'rxtracer'
+        name = 'com.halfhp.rxtracer:rxtracer'
+        licenses = ['Apache-2.0']
+        vcsUrl = gitUrl
+        issueTrackerUrl = issuesUrl
+        publish = true
+        version {
+            name = theVersionName
+            gpg {
+                sign = true
             }
         }
     }
